@@ -424,6 +424,52 @@ class RooflineTest(jtu.JaxTestCase):
     )
     self.assertDataclassEqual(bwd_results, expected)
 
+  @jtu.parameterized.named_parameters(
+      ("abs", lax.abs, jnp.float32),
+      ("acos", lax.acos, jnp.float32),
+      ("asin", lax.asin, jnp.float32),
+      ("atan", lax.atan, jnp.float32),
+      ("cbrt", lax.cbrt, jnp.float32),
+      ("ceil", lax.ceil, jnp.float32),
+      ("conj", lax.conj, jnp.complex64),
+      ("cos", lax.cos, jnp.float32),
+      ("cosh", lax.cosh, jnp.float32),
+      ("exp", lax.exp, jnp.float32),
+      ("expm1", lax.expm1, jnp.float32),
+      ("floor", lax.floor, jnp.float32),
+      ("imag", lax.imag, jnp.complex64),
+      ("integer_pow", lambda a: lax.integer_pow(a, 5), jnp.int32),
+      ("is_finite", lax.is_finite, jnp.float32),
+      ("log", lax.log, jnp.float32),
+      ("log1p", lax.log1p, jnp.float32),
+      ("logistic", lax.logistic, jnp.float32),
+      ("neg", lax.neg, jnp.float32),
+      ("not", lax.bitwise_not, jnp.bool_),
+      ("real", lax.real, jnp.complex64),
+      ("round", lax.round, jnp.float32),
+      ("rsqrt", lax.rsqrt, jnp.float32),
+      ("sign", lax.sign, jnp.float32),
+      ("sin", lax.sin, jnp.float32),
+      ("sinh", lax.sinh, jnp.float32),
+      ("sqrt", lax.sqrt, jnp.float32),
+      ("square", lax.square, jnp.float32),
+      ("tan", lax.tan, jnp.float32),
+      ("bessel_i0e", lax.bessel_i0e, jnp.float32),
+      ("bessel_i1e", lax.bessel_i1e, jnp.float32),
+      ("digamma", lax.digamma, jnp.float32),
+      ("erf_inv", lax.erf_inv, jnp.float32),
+      ("erf", lax.erf, jnp.float32),
+      ("erfc", lax.erfc, jnp.float32),
+      ("lgamma", lax.lgamma, jnp.float32),
+  )
+  def test_unary_ops(self, f, dtype):
+    _, result = roofline.roofline(
+        f,
+        in_specs=(P()),
+        out_specs=P(),
+    )(jnp.zeros((3, 8), dtype=dtype))
+    self.assertEqual(result.unfused_flops, 3 * 8)
+
   def test_binary_ops(self):
     for f in [
         lambda a, b: a ^ b,
